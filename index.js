@@ -1,11 +1,11 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-// const cros = require('cros');
+const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 //? MiddleWare;
-// app.use(cros())
-// app.use(express.json())
+app.use(cors())
+app.use(express.json())
 // TODO uri
 // const uri = "mongodb+srv://9WwxBHCQRsqx3Ozi:<db_password>@cluster0.fdzc9ua.mongodb.net/?appName=Cluster0";
 const uri = "mongodb+srv://secondCrudUsers:9WwxBHCQRsqx3Ozi@cluster0.fdzc9ua.mongodb.net/?appName=Cluster0";
@@ -14,6 +14,10 @@ const uri = "mongodb+srv://secondCrudUsers:9WwxBHCQRsqx3Ozi@cluster0.fdzc9ua.mon
 app.get('/', (req, res) => {
     res.send("Root Server /")
 })
+//? users 
+// app.get('/users', (req, res) => {
+//     res.send("Root Serverssssssssss /")
+// })
 
 // ? crate mongodb user;
 const client = new MongoClient(uri, {
@@ -27,6 +31,26 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         await client.connect();
+        const myDB = client.db("secondCrudUsers");
+        const myColl = myDB.collection("usersDetails");
+        // TODO All Method here;
+        // ! simple get method;
+        app.get('/users', async (req, res) => {
+            const cursor = myColl.find();
+            const result = await cursor.toArray();
+            console.log(result);
+            res.send(result)
+        })
+        // ! Post Method;
+        app.post('/users', async (req, res) => {
+            // const id = req.params.id;
+            const newUsers = req.body
+            // console.log(data);
+            const result = await myColl.insertOne(newUsers)
+            res.send(result)
+
+        })
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
